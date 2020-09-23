@@ -68,7 +68,7 @@ module Simplekiq
 
     def flush_batches(args)
       batching = Sidekiq::Batch.new
-      batching.description = "SimpleKiq Batch Jobs for #{self.class.name}, args: #{args}"
+      batching.description = "Simplekiq Batch Jobs for #{self.class.name}, args: #{args}"
 
       batching.on(:death, self.class, "args" => args) if respond_to?(:on_death)
       batching.on(:success, self.class, "args" => args) if respond_to?(:on_success)
