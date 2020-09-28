@@ -16,7 +16,7 @@
 # See Sidekiq::Batch documentation for the signatures and purpose of #on_success and #on_death
 #
 # class ExampleJob
-#   include SimpleKiq::BatchingJob
+#   include Simplekiq::BatchingJob
 #
 #   def perform_batching(some_id)
 #     Record.find(some_id).other_records.in_batches do |other_records|
