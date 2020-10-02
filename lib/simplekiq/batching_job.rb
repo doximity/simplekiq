@@ -67,15 +67,13 @@ module Simplekiq
     end
 
     def flush_batches(args)
-      batching = Sidekiq::Batch.new
-      batching.description = "Simplekiq Batch Jobs for #{self.class.name}, args: #{args}"
-
-      batching.on(:death, self.class, "args" => args) if respond_to?(:on_death)
-      batching.on(:success, self.class, "args" => args) if respond_to?(:on_success)
-
       batch_job_class = self.class.const_get(BATCH_CLASS_NAME)
+      sidekiq_batch.description ||= "Simplekiq Batch Jobs for #{self.class.name}, args: #{args}"
 
-      batching.jobs do
+      sidekiq_batch.on(:death, self.class, "args" => args) if respond_to?(:on_death)
+      sidekiq_batch.on(:success, self.class, "args" => args) if respond_to?(:on_success)
+
+      sidekiq_batch.jobs do
         batches.each do |job_args|
           batch_job_class.perform_async(*job_args)
         end
@@ -85,6 +83,10 @@ module Simplekiq
     def queue_batch(*args)
       self.batches ||= []
       self.batches << args
+    end
+
+    def sidekiq_batch
+      @sidekiq_batch ||= Sidekiq::Batch.new
     end
   end
 
