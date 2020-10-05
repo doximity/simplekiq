@@ -8,7 +8,8 @@
 #
 # #perform_batching should contain your code for breaking up your work into smaller jobs.
 # It handles all the Sidekiq::Batch boilerplate for you. Where you would normally call ExampleBatchJob.perform_async
-# you should use #queue_batch.
+# you should use #queue_batch. If you'd like to custommize the sidekiq batch
+# object, you can access it in perform_batching through the `sidekiq_batch` method.
 #
 # #perform_batch should contain the code that would be in your batch job. Under the hood #queue_batch
 # queues a job which will run #perform_batch.
@@ -19,6 +20,8 @@
 #   include Simplekiq::BatchingJob
 #
 #   def perform_batching(some_id)
+#     sidekiq_batch.description = "My custom batch description" # optional
+#
 #     Record.find(some_id).other_records.in_batches do |other_records|
 #       queue_batch(other_records.ids)
 #     end
