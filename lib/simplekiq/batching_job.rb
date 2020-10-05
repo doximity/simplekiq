@@ -88,6 +88,12 @@ module Simplekiq
       self.batches << args
     end
 
+    def batch_description=(description)
+      sidekiq_batch.description = description
+    end
+
+    private
+
     def sidekiq_batch
       @sidekiq_batch ||= Sidekiq::Batch.new
     end
