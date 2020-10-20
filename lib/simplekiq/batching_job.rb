@@ -103,7 +103,7 @@ module Simplekiq
     include Sidekiq::Worker
 
     def perform(*args)
-      self.class.parent.new.perform_batch(*args)
+      self.class.module_parent.new.perform_batch(*args)
     end
   end
 end
