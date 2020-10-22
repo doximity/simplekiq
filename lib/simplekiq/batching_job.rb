@@ -53,8 +53,15 @@ module Simplekiq
     end
 
     def perform(*args)
-      perform_batching(*args)
-      handle_batches(args)
+      if batch
+        batch.jobs do
+          perform_batching(*args)
+          handle_batches(args)
+        end
+      else
+        perform_batching(*args)
+        handle_batches(args)
+      end
     end
 
     protected
