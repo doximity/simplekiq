@@ -43,6 +43,7 @@
 
 module Simplekiq
   module BatchingJob
+    include Sidekiq::Worker
     BATCH_CLASS_NAME = "SimplekiqBatch"
 
     class << self
@@ -53,13 +54,12 @@ module Simplekiq
     end
 
     def perform(*args)
-      if batch
+      perform_batching(*args)
+      if batch # If we're part of an existing sidekiq batch make this a child batch
         batch.jobs do
-          perform_batching(*args)
           handle_batches(args)
         end
       else
-        perform_batching(*args)
         handle_batches(args)
       end
     end
