@@ -22,7 +22,7 @@ module Simplekiq
       serial_workflow
     end
 
-    def kickoff
+    def serialized_workflow
       serialized_workflow = serial_workflow.map do |step|
         case step[0]
         when Array
@@ -35,10 +35,6 @@ module Simplekiq
         end
       end
 
-      orchestration_batch = Sidekiq::Batch.new
-      orchestration_batch.jobs do
-        OrchestrationStepJob.perform_async(serialized_workflow, 0)
-      end
     end
   end
 end
