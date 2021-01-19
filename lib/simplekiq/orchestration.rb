@@ -5,7 +5,7 @@ require "simplekiq/orchestration_step_job"
 module Simplekiq
   class Orchestration
     attr_accessor :serial_workflow, :parallel_workflow
-    def initialize(&block)
+    def initialize
       @serial_workflow = []
     end
 
@@ -34,7 +34,6 @@ module Simplekiq
           { "klass" => job.name, "args" => args }
         end
       end
-
     end
   end
 end
