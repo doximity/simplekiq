@@ -18,6 +18,7 @@ module Simplekiq
       @parallel_workflow = []
       yield
       serial_workflow << @parallel_workflow if @parallel_workflow.any?
+    ensure
       @parallel_workflow = nil
       serial_workflow
     end
