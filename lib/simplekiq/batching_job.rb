@@ -55,7 +55,11 @@ module Simplekiq
 
     def perform(*args)
       perform_batching(*args)
-      if batch # If we're part of an existing sidekiq batch make this a child batch
+
+      # If we're part of an existing sidekiq batch make this a child batch
+      # This is necessary for it work with orchestration; we could add an option
+      # to toggle the behavior on and off.
+      if batch
         batch.jobs do
           handle_batches(args)
         end
