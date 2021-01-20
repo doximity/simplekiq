@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "simplekiq/orchestration_step_job"
-
 module Simplekiq
   class Orchestration
     attr_accessor :serial_workflow, :parallel_workflow
@@ -21,6 +19,10 @@ module Simplekiq
     ensure
       @parallel_workflow = nil
       serial_workflow
+    end
+
+    def execute(parent_batch)
+      OrchestrationExecutor.execute(workflow: serialized_workflow, parent_batch: parent_batch)
     end
 
     def serialized_workflow
