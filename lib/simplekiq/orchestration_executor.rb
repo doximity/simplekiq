@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 module Simplekiq
   class OrchestrationExecutor
-    def self.execute(workflow: workflow, parent_batch: parent_batch)
-      run_step(parent_batch, workflow, 0)
+    def self.execute(workflow:, parent_batch:)
+      new.run_step(parent_batch, workflow, 0)
     end
 
     def run_step(parent_batch, workflow, step)
@@ -38,6 +40,5 @@ module Simplekiq
       parent_batch = Sidekiq::Batch.new(status.parent_bid)
       run_step(parent_batch, options["workflow"], options["step"])
     end
-
   end
 end
