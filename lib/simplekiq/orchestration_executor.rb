@@ -13,7 +13,7 @@ module Simplekiq
         sidekiq_batch.on(
           :success,
           self.class,
-          "workflow" => workflow, "step" => step + 1
+          "orchestration_workflow" => workflow, "step" => step + 1
         )
 
         sidekiq_batch.jobs do
@@ -35,10 +35,10 @@ module Simplekiq
     end
 
     def on_success(status, options)
-      return if options["step"] == options["workflow"].length
+      return if options["step"] == options["orchestration_workflow"].length
 
       parent_batch = Sidekiq::Batch.new(status.parent_bid)
-      run_step(parent_batch, options["workflow"], options["step"])
+      run_step(parent_batch, options["orchestration_workflow"], options["step"])
     end
   end
 end
