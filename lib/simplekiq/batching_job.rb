@@ -3,18 +3,26 @@
 # This module enables you to break up your work into batches and run those
 # batches as background jobs while keeping all your code in the same file.
 # Including this module *implements perform* you should not override it.
-# It expects you to implement two methods: #perform_batching and #perform_batch.
-# Optionally you may also implement #on_success or #on_death
+# It expects you to implement two methods: #perform_batching and
+# #perform_batch.
 #
-# #perform_batching should contain your code for breaking up your work into smaller jobs.
-# It handles all the Sidekiq::Batch boilerplate for you. Where you would normally call ExampleBatchJob.perform_async
-# you should use #queue_batch. If you'd like to custommize the sidekiq batch
-# object, you can access it in perform_batching through the `sidekiq_batch` method.
+# Optionally you may also implement any combination of Sidekiq::Batch
+# callbacks.
+#   - #on_complete
+#   - #on_success
+#   - #on_death
 #
-# #perform_batch should contain the code that would be in your batch job. Under the hood #queue_batch
-# queues a job which will run #perform_batch.
+# #perform_batching should contain your code for breaking up your work into
+# smaller jobs. It handles all the Sidekiq::Batch boilerplate for you. Where
+# you would normally call ExampleBatchJob.perform_async you should use
+# #queue_batch. If you'd like to custommize the sidekiq batch object, you can
+# access it in perform_batching through the `sidekiq_batch` method.
 #
-# See Sidekiq::Batch documentation for the signatures and purpose of #on_success and #on_death
+# #perform_batch should contain the code that would be in your batch job. Under
+# the hood, #queue_batch queues a job which will run #perform_batch.
+#
+# [Sidekiq::Batch documentation](https://github.com/mperham/sidekiq/wiki/Batches)
+# explains batches, their lifecycle, callbacks, etc.
 #
 # class ExampleJob
 #   include Simplekiq::BatchingJob
@@ -31,6 +39,16 @@
 #     OtherRecord.where(id: other_record_ids).do_work
 #   end
 #
+#   def on_death(_status, options)
+#     same_id_as_before = options["args"].first
+#     Record.find(same_id_as_before).death!
+#   end
+
+#   def on_complete(_status, options)
+#     same_id_as_before = options["args"].first
+#     Record.find(same_id_as_before).complete!
+#   end
+
 #   def on_success(_status, options)
 #     same_id_as_before = options["args"].first
 #     Record.find(same_id_as_before).success!
@@ -44,6 +62,7 @@
 module Simplekiq
   module BatchingJob
     include Sidekiq::Worker
+
     BATCH_CLASS_NAME = "SimplekiqBatch"
 
     class << self
@@ -75,8 +94,11 @@ module Simplekiq
     def handle_batches(args)
       if batches.present?
         flush_batches(args)
-      elsif respond_to?(:on_success)
-        on_success(nil, { "args" => args })
+      else
+        # Empty batches with no jobs will never invoke callbacks, so handle
+        # that case by immediately manually invoking :complete & :success.
+        on_complete(nil, { "args" => args }) if respond_to?(:on_complete)
+        on_success(nil, { "args" => args }) if respond_to?(:on_success)
       end
     end
 
@@ -85,6 +107,7 @@ module Simplekiq
       sidekiq_batch.description ||= "Simplekiq Batch Jobs for #{self.class.name}, args: #{args}"
 
       sidekiq_batch.on(:death, self.class, "args" => args) if respond_to?(:on_death)
+      sidekiq_batch.on(:complete, self.class, "args" => args) if respond_to?(:on_complete)
       sidekiq_batch.on(:success, self.class, "args" => args) if respond_to?(:on_success)
 
       sidekiq_batch.jobs do
