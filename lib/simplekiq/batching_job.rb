@@ -69,6 +69,17 @@ module Simplekiq
       def included(klass)
         batch_job_class = Class.new(BaseBatch)
         klass.const_set(BATCH_CLASS_NAME, batch_job_class)
+
+        klass.extend ClassMethods
+      end
+    end
+
+    module ClassMethods
+      def batch_sidekiq_options(options)
+        batch_class = const_get(BATCH_CLASS_NAME)
+        batch_class.instance_eval do
+          sidekiq_options(options)
+        end
       end
     end
 
