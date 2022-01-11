@@ -84,6 +84,8 @@ module Simplekiq
     end
 
     def perform(*args)
+      self.batches = []
+
       perform_batching(*args)
 
       # If we're part of an existing sidekiq batch make this a child batch
@@ -98,18 +100,18 @@ module Simplekiq
       end
     end
 
-    protected
+    protected # TODO: should this be private?
 
     attr_accessor :batches
 
     def handle_batches(args)
-      if batches.present?
+      if !batches.empty?
         flush_batches(args)
       else
         # Empty batches with no jobs will never invoke callbacks, so handle
         # that case by immediately manually invoking :complete & :success.
-        on_complete(Sidekiq::Batch::Status.new, { "args" => args }) if respond_to?(:on_complete)
-        on_success(Sidekiq::Batch::Status.new, { "args" => args }) if respond_to?(:on_success)
+        on_complete(nil, { "args" => args }) if respond_to?(:on_complete)
+        on_success(nil, { "args" => args }) if respond_to?(:on_success)
       end
     end
 
@@ -129,7 +131,6 @@ module Simplekiq
     end
 
     def queue_batch(*args)
-      self.batches ||= []
       self.batches << args
     end
 
@@ -148,7 +149,15 @@ module Simplekiq
     include Sidekiq::Worker
 
     def perform(*args)
-      self.class.module_parent.new.perform_batch(*args)
+      module_parent_of_class.new.perform_batch(*args)
+    end
+
+    private
+
+    def module_parent_of_class
+      # Borrowed from https://apidock.com/rails/Module/module_parent_name
+      parent_name = self.class.name =~ /::[^:]+\Z/ ? $`.freeze : nil
+      parent_name ? Object.const_get(parent_name) : Object
     end
   end
 end
