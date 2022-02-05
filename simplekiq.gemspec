@@ -28,5 +28,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "pry"
 
   spec.add_dependency "sidekiq", "~> 5.2.9"
-  spec.add_dependency "sidekiq-ent", ">= 1.8.1"
+  spec.add_dependency "sidekiq-pro", "~> 5.0.0"
 end
