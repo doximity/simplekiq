@@ -3,8 +3,8 @@ require_relative 'lib/simplekiq/version'
 Gem::Specification.new do |spec|
   spec.name          = "simplekiq"
   spec.version       = Simplekiq::VERSION
-  spec.authors       = ["John Wilkinson", "Jack Noble"]
-  spec.email         = ["jcwilkinson@doximity.com", "jnoble@doximity.com"]
+  spec.authors       = ["Jack Noble", "John Wilkinson"]
+  spec.email         = ["jcwilkinson@doximity.com"]
   spec.summary       = %q{Sidekiq-based workflow orchestration library}
   spec.description   = %q{Provides tools for representing long chains of parallel and serial jobs in a flat, simple way.}
   spec.homepage      = "https://github.com/doximity/simplekiq"
