@@ -113,8 +113,13 @@ TODO: Update this section with more specific/appropriate instructions once this 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/doximity/simplekiq.
+1. Fork it
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create a new Pull Request
+6. Sign the CLA if you haven't yet. See CONTRIBUTING.md
 
 ## License
 
-The gem is available as open source under the terms of the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+The gem is licensed under an Apache 2 license. Contributors are required to sign an contributor license agreement. See LICENSE.txt and CONTRIBUTING.md for more information.
