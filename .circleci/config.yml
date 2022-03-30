@@ -58,7 +58,7 @@ jobs:
             - vendor/bundle
       - run:
           name: Run Tests
-          command: bundle exec rake test
+          command: bundle exec rspec
       - store_test_results:
           name: Store test results
           path: tmp/test-results
