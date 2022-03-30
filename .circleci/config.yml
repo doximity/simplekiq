@@ -1,3 +1,5 @@
+---
+
 version: 2.1
 
 orbs:
@@ -7,9 +9,9 @@ executors:
   ruby-latest:
     resource_class: small
     docker:
-      - image: circleci/ruby:2.6
+      - image: circleci/ruby:2.7.2
         environment:
-          BUNDLE_VERSION: "~> 2.1"
+          BUNDLE_VERSION: "~> 2.1.4"
 
 # yaml anchor filters
 master_only: &master_only
@@ -44,21 +46,25 @@ jobs:
           keys:
             - v1-bundle-{{ checksum "Gemfile.lock" }}-
       - run:
+          name: Install Bundler specific version
+          command: |
+            gem install bundler --version "~> 1.17" --force
+      - run:
           name: Install Ruby Dependencies
-          command: bundle check --path=vendor/bundle || bundle install --local --frozen --path=vendor/bundle --jobs=4 --retry=3
+          command: bundle check --path=vendor/bundle || bundle install
       - save_cache:
           key: v1-bundle-{{ checksum "Gemfile.lock" }}-
           paths:
             - vendor/bundle
       - run:
           name: Run Tests
-          command: bundle exec rake ci:specs
+          command: bundle exec rake test
       - store_test_results:
           name: Store test results
           path: tmp/test-results
       - run:
-          name: Build documentation
-          command: bundle exec rake ci:doc
+          name: Run StandardRB
+          command: bundle exec standardrb
       - store_artifacts:
           name: Saves documentation
           path: doc
@@ -70,40 +76,33 @@ jobs:
 workflows:
   version: 2
 
-  trunk:
-    jobs:
-      - build:
-          <<: *master_only
-      - gem/build:
-          <<: *master_only
-          executor: ruby-latest
-          name: gem-build
-          requires:
-            - build
-
   pull-requests:
     jobs:
       - build:
           <<: *pr_only
       - gem/build:
-          <<: *pr_only
           executor: ruby-latest
-          name: gem-build
           requires:
             - build
       - pre-release-approval:
-          <<: *pr_only
           type: approval
           requires:
-            - gem-build
+            - gem/build
       - gem/publish:
-          <<: *pr_only
-          name: gem-publish
-          to_rubygems: true
+          to_nexus: true
           pre_release: true
           requires:
             - pre-release-approval
           context: artifact_publishing
+
+  trunk:
+    jobs:
+      - build:
+          <<: *master_only
+      - gem/build:
+          executor: ruby-latest
+          requires:
+            - build
 
   final-release:
     jobs:
@@ -112,7 +111,6 @@ workflows:
       - gem/build:
           <<: *version_tags_only
           executor: ruby-latest
-          name: gem-build
           requires:
             - build
       - gem/publish:
@@ -121,5 +119,5 @@ workflows:
           to_rubygems: true
           pre_release: false
           requires:
-            - gem-build
+            - gem/build
           context: artifact_publishing
