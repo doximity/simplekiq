@@ -2,6 +2,38 @@ require "bundler/setup"
 require "simplekiq"
 require "pry"
 
+# Faking this because we can't vendor the source code into this gem for legal reasons
+module Sidekiq
+  class Batch
+    def initialize
+      @callbacks = {}
+    end
+
+    def description; end
+    def description=(*); end
+
+    def jobs(&block)
+      block.call
+    end
+
+    # sidekiq_batch.on(:death, self.class, "args" => args)
+    def on(event, klass, args)
+      callbacks[event] ||= []
+      callbacks[event] << {klass => args}
+    end
+
+    def callbacks
+      @callbacks
+    end
+  end
+
+  module Worker
+    def batch
+      nil
+    end
+  end
+end
+
 module SidekiqBatchTestHelpers
   # These helper methods only work in the following test mode:
   # sidekiq: :fake, stub_batches: false
