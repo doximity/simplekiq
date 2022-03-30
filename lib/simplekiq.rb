@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 require "sidekiq"
-require "sidekiq-ent"
+
+# NB: You must explicitly require sidekiq-ent in your app!
+# require "sidekiq-ent"
 
 require "simplekiq/orchestration_executor"
 require "simplekiq/orchestration"

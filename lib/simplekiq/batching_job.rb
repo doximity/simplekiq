@@ -119,9 +119,9 @@ module Simplekiq
       batch_job_class = self.class.const_get(BATCH_CLASS_NAME)
       sidekiq_batch.description ||= "Simplekiq Batch Jobs for #{self.class.name}, args: #{args}"
 
-      sidekiq_batch.on(:death, self.class, "args" => args) if respond_to?(:on_death)
-      sidekiq_batch.on(:complete, self.class, "args" => args) if respond_to?(:on_complete)
-      sidekiq_batch.on(:success, self.class, "args" => args) if respond_to?(:on_success)
+      sidekiq_batch.on("death", self.class, "args" => args) if respond_to?(:on_death)
+      sidekiq_batch.on("complete", self.class, "args" => args) if respond_to?(:on_complete)
+      sidekiq_batch.on("success", self.class, "args" => args) if respond_to?(:on_success)
 
       sidekiq_batch.jobs do
         batches.each do |job_args|
