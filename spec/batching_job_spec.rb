@@ -50,7 +50,8 @@ RSpec.describe Simplekiq::BatchingJob do
           things.each { |t| queue_batch(t) }
         end
 
-        def perform_batch(arg); end
+        def perform_batch(arg)
+        end
 
         def on_success(_, options)
           Output.call(options["args"].first)
@@ -88,7 +89,8 @@ RSpec.describe Simplekiq::BatchingJob do
           things.each { |t| queue_batch(t) }
         end
 
-        def perform_batch(arg); end
+        def perform_batch(arg)
+        end
 
         def on_complete(_, options)
           Output.call(options["args"].first)
@@ -126,7 +128,8 @@ RSpec.describe Simplekiq::BatchingJob do
           things.each { |t| queue_batch(t) }
         end
 
-        def perform_batch(arg); end
+        def perform_batch(arg)
+        end
 
         def on_death(_, options)
           Output.call(options["args"].first)

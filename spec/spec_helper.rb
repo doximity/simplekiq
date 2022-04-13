@@ -9,8 +9,11 @@ module Sidekiq
       @callbacks = {}
     end
 
-    def description; end
-    def description=(*); end
+    def description
+    end
+
+    def description=(*)
+    end
 
     def jobs(&block)
       block.call
@@ -22,9 +25,7 @@ module Sidekiq
       callbacks[event] << {klass => args}
     end
 
-    def callbacks
-      @callbacks
-    end
+    attr_reader :callbacks
   end
 
   module Worker

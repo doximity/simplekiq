@@ -110,8 +110,8 @@ module Simplekiq
       else
         # Empty batches with no jobs will never invoke callbacks, so handle
         # that case by immediately manually invoking :complete & :success.
-        on_complete(nil, { "args" => args }) if respond_to?(:on_complete)
-        on_success(nil, { "args" => args }) if respond_to?(:on_success)
+        on_complete(nil, {"args" => args}) if respond_to?(:on_complete)
+        on_success(nil, {"args" => args}) if respond_to?(:on_success)
       end
     end
 
@@ -131,7 +131,7 @@ module Simplekiq
     end
 
     def queue_batch(*args)
-      self.batches << args
+      batches << args
     end
 
     def batch_description=(description)

@@ -22,8 +22,8 @@ RSpec.describe Simplekiq::OrchestrationJob do
     expect(Simplekiq::OrchestrationExecutor)
       .to have_received(:execute).with({
         workflow: [
-          { "klass" => "OrcTest::JobA", "args" => [1] },
-          { "klass" => "OrcTest::JobB", "args" => [] }
+          {"klass" => "OrcTest::JobA", "args" => [1]},
+          {"klass" => "OrcTest::JobB", "args" => []}
         ],
         parent_batch: nil
       })
@@ -48,10 +48,10 @@ RSpec.describe Simplekiq::OrchestrationJob do
     expect(Simplekiq::OrchestrationExecutor)
       .to have_received(:execute).with({
         workflow: [
-          { "klass" => "OrcTest::JobA", "args" => [] },
+          {"klass" => "OrcTest::JobA", "args" => []},
           [
-            { "klass" => "OrcTest::JobB", "args" => [] },
-            { "klass" => "OrcTest::JobC", "args" => [] }
+            {"klass" => "OrcTest::JobB", "args" => []},
+            {"klass" => "OrcTest::JobC", "args" => []}
 
           ]
         ],
@@ -78,7 +78,7 @@ RSpec.describe Simplekiq::OrchestrationJob do
     expect(Simplekiq::OrchestrationExecutor)
       .to have_received(:execute).with(
         {
-          workflow: [{ "klass" => "OrcTest::JobA", "args" => [] }],
+          workflow: [{"klass" => "OrcTest::JobA", "args" => []}],
           parent_batch: batch_double
         }
       )
