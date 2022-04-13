@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    simplekiq (1.0.0)
+    simplekiq (0.0.1)
       sidekiq (~> 5.2.9)
 
 GEM
@@ -68,10 +68,10 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  easykiq!
   pry
   rake (~> 12.0)
   rspec (~> 3.2)
+  simplekiq!
   standard
 
 BUNDLED WITH
