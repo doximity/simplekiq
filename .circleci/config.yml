@@ -45,7 +45,10 @@ jobs:
             - v1-bundle-{{ checksum "Gemfile.lock" }}-
       - run:
           name: Install Ruby Dependencies
-          command: bundle check --path=vendor/bundle || bundle install --local --frozen --path=vendor/bundle --jobs=4 --retry=3 && bundle clean
+          command: |
+            bundle config set --local path 'vendor/bundle'
+            bundle config set --local frozen 'true'
+            bundle install --local --jobs=4 --retry=3
       - save_cache:
           key: v1-bundle-{{ checksum "Gemfile.lock" }}-
           paths:
