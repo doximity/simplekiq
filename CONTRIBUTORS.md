@@ -17,3 +17,6 @@
 
 ### Tiffany Troha
 * Added support for specifying `sidekiq_options` for the child job in `Simplekiq::BatchingJob`
+
+### [Daniel Pepper](https://github.com/dpep)
+* On request, graciously took down his unused `simplekiq` placeholder from rubygems so we could continue using the name :raised_hands:
