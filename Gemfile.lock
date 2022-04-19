@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    simplekiq (0.0.2)
+    simplekiq (0.0.3)
       sidekiq (~> 5.2.9)
 
 GEM

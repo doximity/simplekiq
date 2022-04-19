@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.summary = "Sidekiq-based workflow orchestration library"
   spec.description = "Provides tools for representing long chains of parallel and serial jobs in a flat, simple way."
   spec.homepage = "https://github.com/doximity/simplekiq"
-  spec.license = "MIT"
+  spec.license = "APACHE-2.0"
   spec.required_ruby_version = Gem::Requirement.new(">= 2.5.0")
 
   spec.metadata["homepage_uri"] = spec.homepage
