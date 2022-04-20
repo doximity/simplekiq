@@ -50,7 +50,8 @@ RSpec.describe Simplekiq::BatchingJob do
           things.each { |t| queue_batch(t) }
         end
 
-        def perform_batch(arg); end
+        def perform_batch(arg)
+        end
 
         def on_success(_, options)
           Output.call(options["args"].first)
@@ -67,7 +68,7 @@ RSpec.describe Simplekiq::BatchingJob do
       expect(output).to have_received(:call).with([])
     end
 
-    it "runs the on_success callback when batches complete successfully", stub_batches: false, sidekiq: :fake do
+    it "runs the on_success callback when batches complete successfully", sidekiq: :fake do
       stub_const("TestJob", test_job)
       stub_const("Output", output = double("Output", call: nil))
       stub_batches
@@ -88,7 +89,8 @@ RSpec.describe Simplekiq::BatchingJob do
           things.each { |t| queue_batch(t) }
         end
 
-        def perform_batch(arg); end
+        def perform_batch(arg)
+        end
 
         def on_complete(_, options)
           Output.call(options["args"].first)
@@ -105,7 +107,7 @@ RSpec.describe Simplekiq::BatchingJob do
       expect(output).to have_received(:call).with([])
     end
 
-    it "runs the on_complete callback when each job has been run once", stub_batches: false, sidekiq: :fake do
+    it "runs the on_complete callback when each job has been run once", sidekiq: :fake do
       stub_const("TestJob", test_job)
       stub_const("Output", output = double("Output", call: nil))
       stub_batches
@@ -126,7 +128,8 @@ RSpec.describe Simplekiq::BatchingJob do
           things.each { |t| queue_batch(t) }
         end
 
-        def perform_batch(arg); end
+        def perform_batch(arg)
+        end
 
         def on_death(_, options)
           Output.call(options["args"].first)
@@ -134,7 +137,7 @@ RSpec.describe Simplekiq::BatchingJob do
       end
     end
 
-    it "runs the on_death callback when a batch fails", stub_batches: false, sidekiq: :fake do
+    it "runs the on_death callback when a batch fails", sidekiq: :fake do
       stub_const("TestJob", test_job)
       stub_const("Output", output = double("Output", call: nil))
       stub_batches

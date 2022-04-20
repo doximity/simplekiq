@@ -7,7 +7,13 @@ Any time that you find yourself needing to string together a long chain of jobs,
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'simplekiq'
+gem "simplekiq"
+```
+
+Note that this gem requires you be a Sidekiq Pro paid subscriber to be able to use it, so after following the installation docs for getting the private gem configured with your system, ensure you have `sidekiq-pro` at version `~> 5.0.0` or higher and that it's being required:
+
+```ruby
+gem "sidekiq-pro", "~> 5.0.0"
 ```
 
 And then execute:

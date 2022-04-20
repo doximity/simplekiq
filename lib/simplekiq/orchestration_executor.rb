@@ -7,6 +7,8 @@ module Simplekiq
     end
 
     def run_step(parent_batch, workflow, step)
+      return if workflow.empty?
+
       nest_under(parent_batch) do
         *jobs = workflow.at(step)
         sidekiq_batch = Sidekiq::Batch.new

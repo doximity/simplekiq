@@ -4,12 +4,12 @@ orbs:
   gem: doximity/gem-publisher@0
 
 executors:
-  ruby-latest:
+  ruby-2-6:
     resource_class: small
     docker:
-      - image: circleci/ruby:2.6
+      - image: cimg/ruby:2.6
         environment:
-          BUNDLE_VERSION: "~> 2.1"
+          BUNDLE_VERSION: "~> 1.17"
 
 # yaml anchor filters
 master_only: &master_only
@@ -33,7 +33,7 @@ version_tags_only: &version_tags_only
 
 jobs:
   build:
-    executor: ruby-latest
+    executor: ruby-2-6
     steps:
       - checkout
       - run:
@@ -45,7 +45,10 @@ jobs:
             - v1-bundle-{{ checksum "Gemfile.lock" }}-
       - run:
           name: Install Ruby Dependencies
-          command: bundle check --path=vendor/bundle || bundle install --local --frozen --path=vendor/bundle --jobs=4 --retry=3
+          command: |
+            bundle config set --local path 'vendor/bundle'
+            bundle config set --local frozen 'true'
+            bundle install --local --jobs=4 --retry=3
       - save_cache:
           key: v1-bundle-{{ checksum "Gemfile.lock" }}-
           paths:
@@ -57,11 +60,8 @@ jobs:
           name: Store test results
           path: tmp/test-results
       - run:
-          name: Build documentation
-          command: bundle exec rake ci:doc
-      - store_artifacts:
-          name: Saves documentation
-          path: doc
+          name: Run StandardRB
+          command: bundle exec standardrb
       - persist_to_workspace:
           root: .
           paths:
@@ -76,7 +76,7 @@ workflows:
           <<: *master_only
       - gem/build:
           <<: *master_only
-          executor: ruby-latest
+          executor: ruby-2-6
           name: gem-build
           requires:
             - build
@@ -87,7 +87,7 @@ workflows:
           <<: *pr_only
       - gem/build:
           <<: *pr_only
-          executor: ruby-latest
+          executor: ruby-2-6
           name: gem-build
           requires:
             - build
@@ -111,7 +111,7 @@ workflows:
           <<: *version_tags_only
       - gem/build:
           <<: *version_tags_only
-          executor: ruby-latest
+          executor: ruby-2-6
           name: gem-build
           requires:
             - build

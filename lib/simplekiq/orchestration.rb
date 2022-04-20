@@ -26,15 +26,15 @@ module Simplekiq
     end
 
     def serialized_workflow
-      serialized_workflow = serial_workflow.map do |step|
+      @serialized_workflow ||= serial_workflow.map do |step|
         case step[0]
         when Array
           step.map do |(job, *args)|
-            { "klass" => job.name, "args" => args }
+            {"klass" => job.name, "args" => args}
           end
         when Class
           job, *args = step
-          { "klass" => job.name, "args" => args }
+          {"klass" => job.name, "args" => args}
         end
       end
     end
