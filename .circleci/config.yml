@@ -78,6 +78,7 @@ workflows:
           <<: *master_only
           executor: ruby-2-6
           name: gem-build
+          vendor-cache: false
           requires:
             - build
 
@@ -89,6 +90,7 @@ workflows:
           <<: *pr_only
           executor: ruby-2-6
           name: gem-build
+          vendor-cache: false
           requires:
             - build
       - pre-release-approval:
@@ -113,6 +115,7 @@ workflows:
           <<: *version_tags_only
           executor: ruby-2-6
           name: gem-build
+          vendor-cache: false
           requires:
             - build
       - gem/publish:
