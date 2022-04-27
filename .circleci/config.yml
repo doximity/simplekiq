@@ -73,6 +73,7 @@ workflows:
   trunk:
     jobs:
       - build:
+          context: artifact_publishing
           <<: *master_only
       - gem/build:
           <<: *master_only
@@ -80,6 +81,7 @@ workflows:
           name: gem-build
           vendor-cache: false
           cache-salt: simplekiq-v1
+          context: artifact_publishing
           requires:
             - build
 
@@ -87,12 +89,14 @@ workflows:
     jobs:
       - build:
           <<: *pr_only
+          context: artifact_publishing
       - gem/build:
           <<: *pr_only
           executor: ruby-2-6
           name: gem-build
           vendor-cache: false
           cache-salt: simplekiq-v1
+          context: artifact_publishing
           requires:
             - build
       - pre-release-approval:
@@ -113,12 +117,14 @@ workflows:
     jobs:
       - build:
           <<: *version_tags_only
+          context: artifact_publishing
       - gem/build:
           <<: *version_tags_only
           executor: ruby-2-6
           name: gem-build
           vendor-cache: false
           cache-salt: simplekiq-v1
+          context: artifact_publishing
           requires:
             - build
       - gem/publish:
