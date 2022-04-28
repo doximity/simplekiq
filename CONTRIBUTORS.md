@@ -12,7 +12,7 @@
 * Added additional comment documentation
 * Added support for `on_complete` batch callback support in `Simplekiq::BatchingJob`
 
-### Austin Madden
+### Austen Madden
 * Fixed bug with batch statuses in callbacks for empty batches
 
 ### Tiffany Troha
