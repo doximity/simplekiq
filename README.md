@@ -38,8 +38,7 @@ There are currently two primary components of the system which were designed to 
 Mixing in the [Simplekiq::Orchestration](./lib/simplekiq/orchestration_job.rb) module lets you define a human-readable workflow of jobs in a single file with almost* no special requirements or restrictions on how the child jobs are designed. In most cases, Sidekiq jobs not designed for use in orchestrations should be compatible for use in orchestrations. A job implementing `OrchestrationJob` might look like:
 
 ```ruby
-class SomeOrchestrationJob < BaseJob
-  include Sidekiq::Worker
+class SomeOrchestrationJob
   include Simplekiq::OrchestrationJob
 
   def perform_orchestration(some_id)
