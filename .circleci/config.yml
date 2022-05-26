@@ -55,7 +55,6 @@ jobs:
           name: Install Ruby Dependencies
           command: |
             bundle config set --local path 'vendor/bundle'
-            bundle config set --local enterprise.contribsys.com $SIDEKIQ_ENTERPRISE_PASS
             bundle install --jobs=4 --retry=3
       - save_cache:
           key: v3-bundle-{{ checksum "Gemfile.lock" }}-
