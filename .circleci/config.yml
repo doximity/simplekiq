@@ -74,7 +74,7 @@ workflows:
     jobs:
       - build:
           <<: *master_only
-          context: artifact_publishing
+          context: sidekiq-enterprise
       - gem/build:
           <<: *master_only
           executor: ruby-2-6
@@ -88,9 +88,10 @@ workflows:
     jobs:
       - build:
           <<: *pr_only
-          context: artifact_publishing
+          context: sidekiq-enterprise
       - gem/build:
           <<: *pr_only
+          context: sidekiq-enterprise
           executor: ruby-2-6
           name: gem-build
           vendor-cache: false
@@ -115,9 +116,10 @@ workflows:
     jobs:
       - build:
           <<: *version_tags_only
-          context: artifact_publishing
+          context: sidekiq-enterprise
       - gem/build:
           <<: *version_tags_only
+          context: sidekiq-enterprise
           executor: ruby-2-6
           name: gem-build
           vendor-cache: false
