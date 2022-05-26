@@ -50,14 +50,14 @@ jobs:
             gem install bundler --version "${BUNDLE_VERSION}" --force
       - restore_cache:
           keys:
-            - v3-bundle-{{ checksum "Gemfile.lock" }}-
+            - v4-bundle-{{ checksum "Gemfile.lock" }}-
       - run:
           name: Install Ruby Dependencies
           command: |
             bundle config set --local path 'vendor/bundle'
             bundle install --jobs=4 --retry=3
       - save_cache:
-          key: v3-bundle-{{ checksum "Gemfile.lock" }}-
+          key: v4-bundle-{{ checksum "Gemfile.lock" }}-
           paths:
             - vendor/bundle
       - run:
@@ -87,7 +87,7 @@ workflows:
           executor: ruby
           name: gem-build
           vendor-cache: false
-          cache-salt: simplekiq-v1
+          cache-salt: simplekiq-v2
           requires:
             - build
 
@@ -102,7 +102,7 @@ workflows:
           executor: ruby
           name: gem-build
           vendor-cache: false
-          cache-salt: simplekiq-v1
+          cache-salt: simplekiq-v2
           requires:
             - build
       - pre-release-approval:
@@ -131,7 +131,7 @@ workflows:
           executor: ruby
           name: gem-build
           vendor-cache: false
-          cache-salt: simplekiq-v1
+          cache-salt: simplekiq-v2
           requires:
             - build
       - gem/publish:
