@@ -20,12 +20,12 @@ executors:
         command: redis-server
 
 # yaml anchor filters
-master_only: &master_only
+always_run: &always_run
   filters:
     branches:
-      only: master
+      only: /.*/
     tags:
-      ignore: /.*/
+      only: /^v.*/
 pr_only: &pr_only
   filters:
     branches:
@@ -75,30 +75,14 @@ jobs:
             - vendor/bundle
 
 workflows:
-  version: 2
 
-  trunk:
+  main:
     jobs:
       - build:
-          <<: *master_only
+          <<: *always_run
           context: sidekiq-enterprise
       - gem/build:
-          <<: *master_only
-          executor: ruby
-          name: gem-build
-          vendor-cache: false
-          cache-salt: simplekiq-v2
-          requires:
-            - build
-
-  pull-requests:
-    jobs:
-      - build:
-          <<: *pr_only
-          context: sidekiq-enterprise
-      - gem/build:
-          <<: *pr_only
-          context: sidekiq-enterprise
+          <<: *always_run
           executor: ruby
           name: gem-build
           vendor-cache: false
@@ -113,30 +97,15 @@ workflows:
       - gem/publish:
           <<: *pr_only
           executor: ruby
-          name: gem-publish
+          name: gem-publish-pre
           to_rubygems: true
           pre_release: true
           requires:
             - pre-release-approval
           context: artifact_publishing
-
-  final-release:
-    jobs:
-      - build:
-          <<: *version_tags_only
-          context: sidekiq-enterprise
-      - gem/build:
-          <<: *version_tags_only
-          context: sidekiq-enterprise
-          executor: ruby
-          name: gem-build
-          vendor-cache: false
-          cache-salt: simplekiq-v2
-          requires:
-            - build
       - gem/publish:
           <<: *version_tags_only
-          name: gem-publish
+          name: gem-publish-final
           executor: ruby
           to_rubygems: true
           pre_release: false
