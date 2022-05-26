@@ -83,6 +83,7 @@ workflows:
           context: sidekiq-enterprise
       - gem/build:
           <<: *always_run
+          context: sidekiq-enterprise
           executor: ruby
           name: gem-build
           vendor-cache: false
