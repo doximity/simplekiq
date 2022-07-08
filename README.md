@@ -55,6 +55,17 @@ class SomeOrchestrationJob
     run SomeFinalizationJob, some_model.id # 4.
   end
 
+  def on_death(status, options) # 5.
+    SomeModel.find(options["args"].first).failure_happened!
+  end
+
+  def on_complete(status, options) # 6.
+    failures = Array(status&.failure_info) # sidekiq-pro batch status api
+    return if failures.empty?
+
+    SomeModel.find(options["args"].first).it_was_these_failures(failures)
+  end
+
   private
 
   attr_reader :some_model
@@ -71,6 +82,8 @@ Let's use the above example to describe some specifics of how the flow works.
 2. It does some initial work in `SomeInitialSetupJob`, which blocks the rest of the workflow until it completes successfully.
 3. Then it will run a `SomeParallelizableJob` for each of some number of associated models `some_related_models`. These jobs will all run parallel to each other independently.
 4. Finally, after all of the parallel jobs from #3 complete successfully, `SomeFinalizationJob` will run and then after it finishes the orchestration will be complete.
+5. If it ran into an error at some point, `on_death` will get fired with the first failure.
+6. It will call `on_complete` at the end of the orchestration no matter what, this is the place to collect all the failures and persist them somewhere.
 
 **Note** - it's fine to add utility methods and `attr_accessor`s to keep the code tidy and maintainable.
 
