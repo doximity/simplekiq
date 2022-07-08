@@ -2,14 +2,19 @@
 
 module Simplekiq
   class OrchestrationExecutor
-    def self.execute(workflow:, parent_batch:)
-      new.run_step(parent_batch, workflow, 0)
+    def self.execute(classname:, workflow:)
+      orchestration_batch = Sidekiq::Batch.new
+      orchestration_batch.description = "#{classname} Simplekiq orchestration"
+
+      orchestration_batch.jobs do
+        new.run_step(orchestration_batch, workflow, 0)
+      end
     end
 
-    def run_step(parent_batch, workflow, step)
+    def run_step(orchestration_batch, workflow, step)
       return if workflow.empty?
 
-      nest_under(parent_batch) do
+      orchestration_batch.jobs do
         *jobs = workflow.at(step)
         sidekiq_batch = Sidekiq::Batch.new
         sidekiq_batch.on(
@@ -26,21 +31,11 @@ module Simplekiq
       end
     end
 
-    def nest_under(parent_batch)
-      if parent_batch
-        parent_batch.jobs do
-          yield
-        end
-      else
-        yield
-      end
-    end
-
     def on_success(status, options)
       return if options["step"] == options["orchestration_workflow"].length
 
-      parent_batch = Sidekiq::Batch.new(status.parent_bid)
-      run_step(parent_batch, options["orchestration_workflow"], options["step"])
+      orchestration_batch = Sidekiq::Batch.new(status.parent_bid)
+      run_step(orchestration_batch, options["orchestration_workflow"], options["step"])
     end
   end
 end
