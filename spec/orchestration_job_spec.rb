@@ -64,9 +64,9 @@ RSpec.describe Simplekiq::OrchestrationJob do
 
     batch_stack_depth = 0 # to keep track of how deeply nested within batches we are
     allow(batch_double).to receive(:jobs) do |&block|
-      batch_stack_depth+= 1
+      batch_stack_depth += 1
       block.call
-      batch_stack_depth-= 1
+      batch_stack_depth -= 1
     end
 
     stub_const("FakeOrchestration", Class.new do
