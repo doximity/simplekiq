@@ -25,7 +25,7 @@ module Simplekiq
         step_batch.on(
           "success",
           self.class,
-          { "orchestration_workflow" => workflow, "step" => step + 1 }
+          {"orchestration_workflow" => workflow, "step" => step + 1}
         )
 
         step_batch.jobs do

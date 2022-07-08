@@ -31,7 +31,6 @@ RSpec.describe Simplekiq::Orchestration do
         end
       end
 
-
       it "adds a step" do
         expect(subject).to eq [
           [

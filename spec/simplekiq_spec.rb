@@ -65,9 +65,9 @@ RSpec.describe Simplekiq do
     end
 
     it "defines callbacks on the batch for every callback the job defines" do
-      expect(batch).to receive(:on).once.ordered.with("death", OrcTest::CallbacksJob, "args" => [1,2,3])
-      expect(batch).to receive(:on).once.ordered.with("complete", OrcTest::CallbacksJob, "args" => [1,2,3])
-      expect(batch).to receive(:on).once.ordered.with("success", OrcTest::CallbacksJob, "args" => [1,2,3])
+      expect(batch).to receive(:on).once.ordered.with("death", OrcTest::CallbacksJob, "args" => [1, 2, 3])
+      expect(batch).to receive(:on).once.ordered.with("complete", OrcTest::CallbacksJob, "args" => [1, 2, 3])
+      expect(batch).to receive(:on).once.ordered.with("success", OrcTest::CallbacksJob, "args" => [1, 2, 3])
       call
     end
 
