@@ -1,62 +1,39 @@
 # frozen_string_literal: true
 
 RSpec.describe Simplekiq::OrchestrationJob do
+  let!(:job) do
+    stub_const("FakeOrchestration", Class.new do
+      include Simplekiq::OrchestrationJob
+      def perform_orchestration(first, second)
+        run OrcTest::JobA, first
+        run OrcTest::JobB, second
+      end
+    end)
+
+    FakeOrchestration.new
+  end
+
   before do
     stub_const("OrcTest::JobA", Class.new)
     stub_const("OrcTest::JobB", Class.new)
     stub_const("OrcTest::JobC", Class.new)
   end
 
-  it "adds a new job to the sequence with #run" do
-    allow(Simplekiq::OrchestrationExecutor).to receive(:execute)
-    stub_const("FakeOrchestration", Class.new do
-      include Simplekiq::OrchestrationJob
-      def perform_orchestration
-        run OrcTest::JobA, 1
-        run OrcTest::JobB
-      end
-    end)
-
-    FakeOrchestration.new.perform
-
-    expect(Simplekiq::OrchestrationExecutor)
-      .to have_received(:execute).with({
-        workflow: [
-          {"klass" => "OrcTest::JobA", "args" => [1]},
-          {"klass" => "OrcTest::JobB", "args" => []}
-        ],
-        classname: "FakeOrchestration"
-      })
+  def perform
+    job.perform("some", "args")
   end
 
-  it "adds a new jobs in parallel with #in_parallel" do
-    allow(Simplekiq::OrchestrationExecutor).to receive(:execute)
-    stub_const("FakeOrchestration", Class.new do
-      include Simplekiq::OrchestrationJob
+  it "adds a new job to the sequence with #run" do
+    expect(Simplekiq::OrchestrationExecutor).to receive(:execute).with(
+      args: ["some", "args"],
+      job: job,
+      workflow: [
+        {"klass" => "OrcTest::JobA", "args" => ["some"]},
+        {"klass" => "OrcTest::JobB", "args" => ["args"]}
+      ]
+    )
 
-      def perform_orchestration
-        run OrcTest::JobA
-        in_parallel do
-          run OrcTest::JobB
-          run OrcTest::JobC
-        end
-      end
-    end)
-
-    FakeOrchestration.new.perform
-
-    expect(Simplekiq::OrchestrationExecutor)
-      .to have_received(:execute).with({
-        workflow: [
-          {"klass" => "OrcTest::JobA", "args" => []},
-          [
-            {"klass" => "OrcTest::JobB", "args" => []},
-            {"klass" => "OrcTest::JobC", "args" => []}
-
-          ]
-        ],
-        classname: "FakeOrchestration"
-      })
+    perform
   end
 
   it "enables composition of orchestrations by re-opening the parent batch" do
@@ -69,29 +46,45 @@ RSpec.describe Simplekiq::OrchestrationJob do
       batch_stack_depth -= 1
     end
 
-    stub_const("FakeOrchestration", Class.new do
-      include Simplekiq::OrchestrationJob
-      def perform_orchestration
-        run OrcTest::JobA
-      end
-    end)
-
-    job = FakeOrchestration.new
-
     allow(job).to receive(:batch).and_return(batch_double)
 
-    allow(Simplekiq::OrchestrationExecutor).to receive(:execute) do
+    expect(Simplekiq::OrchestrationExecutor).to receive(:execute) do
       expect(batch_stack_depth).to eq 1
     end
 
-    job.perform
+    perform
+  end
 
-    expect(Simplekiq::OrchestrationExecutor)
-      .to have_received(:execute).with(
-        {
-          workflow: [{"klass" => "OrcTest::JobA", "args" => []}],
-          classname: "FakeOrchestration"
-        }
+  context "with jobs specified in_parallel" do
+    let!(:job) do
+      stub_const("FakeOrchestration", Class.new do
+        include Simplekiq::OrchestrationJob
+        def perform_orchestration(first, second)
+          run OrcTest::JobA, first
+          in_parallel do
+            run OrcTest::JobB, first
+            run OrcTest::JobC, second
+          end
+        end
+      end)
+
+      FakeOrchestration.new
+    end
+
+    it "adds a new jobs in parallel form to the workflow" do
+      expect(Simplekiq::OrchestrationExecutor).to receive(:execute).with(
+        args: ["some", "args"],
+        job: job,
+        workflow: [
+          {"klass" => "OrcTest::JobA", "args" => ["some"]},
+          [
+            {"klass" => "OrcTest::JobB", "args" => ["some"]},
+            {"klass" => "OrcTest::JobC", "args" => ["args"]}
+          ]
+        ]
       )
+
+      perform
+    end
   end
 end
