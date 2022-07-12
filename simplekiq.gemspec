@@ -29,10 +29,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "pry"
   spec.add_development_dependency "standard"
 
-  spec.add_dependency "sidekiq", "~> 5.2.9"
-
-  # Can't define this explicitly because it would be inappropriate to vendor this
-  # pay-to-use library into the gem and it is not available on rubygems and
-  # this otherwise interferes with our publishing process.
-  # spec.add_dependency "sidekiq-pro", "~> 5.0.0"
+  spec.add_dependency "sidekiq", ">= 5.2.9"
+  spec.add_dependency "sidekiq-pro", "~> 5.0"
 end

@@ -4,20 +4,28 @@ orbs:
   gem: doximity/gem-publisher@0
 
 executors:
-  ruby-2-6:
+  ruby:
     resource_class: small
     docker:
       - image: cimg/ruby:2.6
         environment:
-          BUNDLE_VERSION: "~> 1.17"
+          BUNDLE_VERSION: "~> 2.1.4"
+  ruby-with-redis:
+    resource_class: small
+    docker:
+      - image: cimg/ruby:2.6
+        environment:
+          BUNDLE_VERSION: "~> 2.1.4"
+      - image: redis:4-alpine
+        command: redis-server
 
 # yaml anchor filters
-master_only: &master_only
+always_run: &always_run
   filters:
     branches:
-      only: master
+      only: /.*/
     tags:
-      ignore: /.*/
+      only: /^v.*/
 pr_only: &pr_only
   filters:
     branches:
@@ -33,7 +41,7 @@ version_tags_only: &version_tags_only
 
 jobs:
   build:
-    executor: ruby-2-6
+    executor: ruby-with-redis
     steps:
       - checkout
       - run:
@@ -42,15 +50,14 @@ jobs:
             gem install bundler --version "${BUNDLE_VERSION}" --force
       - restore_cache:
           keys:
-            - v1-bundle-{{ checksum "Gemfile.lock" }}-
+            - v4-bundle-{{ checksum "Gemfile.lock" }}-
       - run:
           name: Install Ruby Dependencies
           command: |
             bundle config set --local path 'vendor/bundle'
-            bundle config set --local frozen 'true'
-            bundle install --local --jobs=4 --retry=3
+            bundle install --jobs=4 --retry=3
       - save_cache:
-          key: v1-bundle-{{ checksum "Gemfile.lock" }}-
+          key: v4-bundle-{{ checksum "Gemfile.lock" }}-
           paths:
             - vendor/bundle
       - run:
@@ -68,27 +75,19 @@ jobs:
             - vendor/bundle
 
 workflows:
-  version: 2
 
-  trunk:
+  main:
     jobs:
       - build:
-          <<: *master_only
+          <<: *always_run
+          context: sidekiq-enterprise
       - gem/build:
-          <<: *master_only
-          executor: ruby-2-6
+          <<: *always_run
+          context: sidekiq-enterprise
+          executor: ruby
           name: gem-build
-          requires:
-            - build
-
-  pull-requests:
-    jobs:
-      - build:
-          <<: *pr_only
-      - gem/build:
-          <<: *pr_only
-          executor: ruby-2-6
-          name: gem-build
+          vendor-cache: false
+          cache-salt: simplekiq-v2
           requires:
             - build
       - pre-release-approval:
@@ -98,26 +97,17 @@ workflows:
             - gem-build
       - gem/publish:
           <<: *pr_only
-          name: gem-publish
+          executor: ruby
+          name: gem-publish-pre
           to_rubygems: true
           pre_release: true
           requires:
             - pre-release-approval
           context: artifact_publishing
-
-  final-release:
-    jobs:
-      - build:
-          <<: *version_tags_only
-      - gem/build:
-          <<: *version_tags_only
-          executor: ruby-2-6
-          name: gem-build
-          requires:
-            - build
       - gem/publish:
           <<: *version_tags_only
-          name: gem-publish
+          name: gem-publish-final
+          executor: ruby
           to_rubygems: true
           pre_release: false
           requires:
