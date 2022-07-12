@@ -21,10 +21,6 @@ module Simplekiq
       serial_workflow
     end
 
-    def execute(parent_batch)
-      OrchestrationExecutor.execute(workflow: serialized_workflow, parent_batch: parent_batch)
-    end
-
     def serialized_workflow
       @serialized_workflow ||= serial_workflow.map do |step|
         case step[0]
