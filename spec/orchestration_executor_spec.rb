@@ -31,9 +31,9 @@ RSpec.describe Simplekiq::OrchestrationExecutor do
 
       batch_stack_depth = 0 # to keep track of how deeply nested within batches we are
       expect(batch_double).to receive(:jobs) do |&block|
-        batch_stack_depth+= 1
+        batch_stack_depth += 1
         block.call
-        batch_stack_depth-= 1
+        batch_stack_depth -= 1
       end
 
       expect(Simplekiq::BatchTrackerJob).to receive(:perform_async) do
@@ -76,9 +76,9 @@ RSpec.describe Simplekiq::OrchestrationExecutor do
     it "runs the next job within a new step batch" do
       batch_stack_depth = 0 # to keep track of how deeply nested within batches we are
       expect(step_batch).to receive(:jobs) do |&block|
-        batch_stack_depth+= 1
+        batch_stack_depth += 1
         block.call
-        batch_stack_depth-= 1
+        batch_stack_depth -= 1
       end
 
       expect(OrcTest::JobA).to receive(:perform_async) do |arg|
