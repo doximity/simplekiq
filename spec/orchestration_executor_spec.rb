@@ -23,15 +23,29 @@ RSpec.describe Simplekiq::OrchestrationExecutor do
       described_class.execute(args: ["some", "args"], job: job, workflow: workflow)
     end
 
-    it "kicks off the first step with a new batch" do
-      batch_double = instance_double(Sidekiq::Batch)
+    it "kicks off the first step with a new batch with the empty tracking batch inside it" do
+      batch_double = instance_double(Sidekiq::Batch, bid: 42)
       allow(Sidekiq::Batch).to receive(:new).and_return(batch_double)
       expect(batch_double).to receive(:description=).with("FakeOrchestration Simplekiq orchestration")
       expect(batch_double).to receive(:on).with("success", FakeOrchestration, "args" => ["some", "args"])
 
+      batch_stack_depth = 0 # to keep track of how deeply nested within batches we are
+      expect(batch_double).to receive(:jobs) do |&block|
+        batch_stack_depth += 1
+        block.call
+        batch_stack_depth -= 1
+      end
+
+      expect(Simplekiq::BatchTrackerJob).to receive(:perform_async) do
+        expect(batch_stack_depth).to eq 1
+      end
+
       instance = instance_double(Simplekiq::OrchestrationExecutor)
       allow(Simplekiq::OrchestrationExecutor).to receive(:new).and_return(instance)
-      expect(instance).to receive(:run_step).with(batch_double, workflow, 0)
+      expect(instance).to receive(:run_step) do |workflow_arg, step|
+        expect(batch_stack_depth).to eq 1
+        expect(step).to eq 0
+      end
 
       execute
     end
@@ -55,29 +69,20 @@ RSpec.describe Simplekiq::OrchestrationExecutor do
   end
 
   describe "run_step" do
-    let(:orchestration_batch) { instance_double(Sidekiq::Batch) }
     let(:step_batch) { instance_double(Sidekiq::Batch) }
     let(:step) { 0 }
     let(:instance) { described_class.new }
 
-    it "runs the next job within a new step batch which is within the orchestration batch" do
-      batch_stack = [] # to keep track of how deeply nested within batches we are
-      expect(orchestration_batch).to receive(:jobs) do |&block|
-        expect(batch_stack).to be_empty
-
-        batch_stack.push("orchestration")
-        block.call
-        batch_stack.shift
-      end
+    it "runs the next job within a new step batch" do
+      batch_stack_depth = 0 # to keep track of how deeply nested within batches we are
       expect(step_batch).to receive(:jobs) do |&block|
-        expect(batch_stack).to eq ["orchestration"]
-        batch_stack.push("step")
+        batch_stack_depth += 1
         block.call
-        batch_stack.shift
+        batch_stack_depth -= 1
       end
 
       expect(OrcTest::JobA).to receive(:perform_async) do |arg|
-        expect(batch_stack).to eq ["orchestration", "step"]
+        expect(batch_stack_depth).to eq 1
         expect(arg).to eq 1
       end
 
@@ -86,8 +91,9 @@ RSpec.describe Simplekiq::OrchestrationExecutor do
         "orchestration_workflow" => workflow,
         "step" => 1
       })
+      expect(step_batch).to receive(:description=).with("Simplekiq orchestrated step 1")
 
-      instance.run_step(orchestration_batch, workflow, 0)
+      instance.run_step(workflow, 0)
     end
   end
 end
