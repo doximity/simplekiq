@@ -10,7 +10,7 @@ Add this line to your application's Gemfile:
 gem "simplekiq"
 ```
 
-Note that this gem requires you be a Sidekiq Pro paid subscriber to be able to use it, so after following the installation docs for getting the private gem configured with your system, ensure you have `sidekiq-pro` at version `~> 5.0.0` or higher and that it's being required:
+Note that this gem requires you be a Sidekiq Pro paid subscriber to be able to use it, so after following the installation docs for getting the private gem configured with your system, ensure you have `sidekiq-pro` at version `~> 5.0.0` or higher (need at least version `5.2.1` if you want to capture `on_death` callbacks [percolating up to parent batches](https://github.com/mperham/sidekiq/blob/main/Pro-Changes.md#521) - a supported feature which is not required for typical orchestration behavior) and that it's being required:
 
 ```ruby
 gem "sidekiq-pro", "~> 5.0.0"
@@ -82,7 +82,7 @@ Let's use the above example to describe some specifics of how the flow works.
 2. It does some initial work in `SomeInitialSetupJob`, which blocks the rest of the workflow until it completes successfully.
 3. Then it will run a `SomeParallelizableJob` for each of some number of associated models `some_related_models`. These jobs will all run parallel to each other independently.
 4. Finally, after all of the parallel jobs from #3 complete successfully, `SomeFinalizationJob` will run and then after it finishes the orchestration will be complete.
-5. If it ran into an error at some point, `on_death` will get fired with the first failure.
+5. If it ran into an error at some point, `on_death` will get fired with the first failure. (please use `sidekiq-pro` of at least `5.2.1` for this feature)
 6. It will call `on_complete` at the end of the orchestration no matter what, this is the place to collect all the failures and persist them somewhere.
 
 **Note** - it's fine to add utility methods and `attr_accessor`s to keep the code tidy and maintainable.
@@ -117,17 +117,19 @@ The crux of the problem was that each job was highly coupled to its position in 
 
 ## Versioning
 
-This project follows semantic versioning. At time of writing it is sitting at 0.0.1 until its integration with the application it was extracted from is confirmed to be stable. Once confirmed it will be started off at 1.0.0 as it has otherwise been used in a production system already for some time.
+This project follows semantic versioning. See https://semver.org/ for details.
 
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Note that this depends on `sidekiq-pro` which requires a [commercial license](https://sidekiq.org/products/pro.html) to install and use.
 
-Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+Then, run `rake ci:specs` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+To install this gem onto your local machine, run `bundle exec rake install`.
 
-TODO: Update this section with more specific/appropriate instructions once this is a public repository.
+To get a new release cut, please either open a PR or an issue with your ask with as much context as possible and someone from Doximity will consider your request. If it makes sense for the direction of the project we'll get it done and inform you of when a release has been made available with the changes.
+
+For internal employees: consult the company wiki on the current standard process for conducting releases for our public gems.
 
 ## Contributing
 
