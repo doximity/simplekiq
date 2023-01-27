@@ -1,0 +1,7 @@
+
+# Infra Automation
+/.circleci @doximity/infra_automation_reviewers
+/.github/workflows @doximity/infra_automation_reviewers
+/.github/actions @doximity/infra_automation_reviewers
+
+EOT     
