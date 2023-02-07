@@ -29,6 +29,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "pry"
   spec.add_development_dependency "standard"
 
-  spec.add_dependency "sidekiq", ">= 5.2.9"
-  spec.add_dependency "sidekiq-pro", "~> 5.0"
+  spec.add_dependency "sidekiq", "~> 7.0"
+  spec.add_dependency "sidekiq-pro", "~> 7.0"
 end
