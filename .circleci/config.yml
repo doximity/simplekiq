@@ -16,7 +16,7 @@ executors:
       - image: cimg/ruby:2.6
         environment:
           BUNDLE_VERSION: "~> 2.1.4"
-      - image: redis:4-alpine
+      - image: redis:6.2
         command: redis-server
 
 # yaml anchor filters
