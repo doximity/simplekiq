@@ -1,8 +1,5 @@
 version: 2.1
 
-orbs:
-  gem: doximity/gem-publisher@0
-
 executors:
   ruby:
     resource_class: small
@@ -48,18 +45,11 @@ jobs:
           name: Install Bundler specific version
           command: |
             gem install bundler --version "${BUNDLE_VERSION}" --force
-      - restore_cache:
-          keys:
-            - v4-bundle-{{ checksum "Gemfile.lock" }}-
       - run:
           name: Install Ruby Dependencies
           command: |
             bundle config set --local path 'vendor/bundle'
             bundle install --jobs=4 --retry=3
-      - save_cache:
-          key: v4-bundle-{{ checksum "Gemfile.lock" }}-
-          paths:
-            - vendor/bundle
       - run:
           name: Run Tests
           command: bundle exec rake ci:specs
@@ -75,41 +65,8 @@ jobs:
             - vendor/bundle
 
 workflows:
-
   main:
     jobs:
       - build:
           <<: *always_run
           context: sidekiq-enterprise
-      - gem/build:
-          <<: *always_run
-          context: sidekiq-enterprise
-          executor: ruby
-          name: gem-build
-          vendor-cache: false
-          cache-salt: simplekiq-v2
-          requires:
-            - build
-      - pre-release-approval:
-          <<: *pr_only
-          type: approval
-          requires:
-            - gem-build
-      - gem/publish:
-          <<: *pr_only
-          executor: ruby
-          name: gem-publish-pre
-          to_rubygems: true
-          pre_release: true
-          requires:
-            - pre-release-approval
-          context: artifact_publishing
-      - gem/publish:
-          <<: *version_tags_only
-          name: gem-publish-final
-          executor: ruby
-          to_rubygems: true
-          pre_release: false
-          requires:
-            - gem-build
-          context: artifact_publishing
