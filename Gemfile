@@ -4,7 +4,7 @@ source "https://enterprise.contribsys.com/" do
   gem "sidekiq-pro", "5.2.1"
 end
 
-gem "sidekiq", "6.1.0"
+gem "sidekiq", "6.5.10"
 
 # Specify your gem's dependencies in simplekiq.gemspec
 gemspec
