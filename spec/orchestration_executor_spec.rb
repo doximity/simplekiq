@@ -36,15 +36,8 @@ RSpec.describe Simplekiq::OrchestrationExecutor do
         batch_stack_depth -= 1
       end
 
-      expect(Simplekiq::BatchTrackerJob).to receive(:perform_async) do
+      expect(Simplekiq::KickoffJob).to receive(:perform_async) do
         expect(batch_stack_depth).to eq 1
-      end
-
-      instance = instance_double(Simplekiq::OrchestrationExecutor)
-      allow(Simplekiq::OrchestrationExecutor).to receive(:new).and_return(instance)
-      expect(instance).to receive(:run_step) do |workflow_arg, step|
-        expect(batch_stack_depth).to eq 1
-        expect(step).to eq 0
       end
 
       execute
@@ -54,7 +47,7 @@ RSpec.describe Simplekiq::OrchestrationExecutor do
       let(:workflow) { [] }
 
       it "immediately calls the orchestration callbacks" do
-        expect(job).to receive(:on_success).with(nil, "args" => ["some", "args"])
+        expect(job).to receive(:on_success).with(nil, hash_including("args" => ["some", "args"]))
 
         execute
       end

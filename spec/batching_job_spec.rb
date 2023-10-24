@@ -22,7 +22,8 @@ RSpec.describe Simplekiq::BatchingJob do
       end
     end
 
-    it "runs batches" do
+    it "runs batches", sidekiq: :fake do
+      stub_batches
       stub_const("TestJob", test_job)
       stub_const("Output", output = double("Output", call: nil))
 
@@ -31,7 +32,8 @@ RSpec.describe Simplekiq::BatchingJob do
       expect(output).to have_received(:call).with("test")
     end
 
-    it "queues a job with a readable name" do
+    it "queues a job with a readable name", sidekiq: :fake do
+      stub_batches
       stub_const("TestJob", test_job)
       allow(TestJob::SimplekiqBatch).to receive(:perform_async)
 

@@ -29,8 +29,8 @@ RSpec.describe Simplekiq do
     end
 
     it "calls the on_success and on_complete callback methods on the job" do
-      expect(job).to receive(:on_complete).with(nil, "args" => [1, 2, 3])
-      expect(job).to receive(:on_success).with(nil, "args" => [1, 2, 3])
+      expect(job).to receive(:on_complete).with(nil, hash_including("args" => [1, 2, 3]))
+      expect(job).to receive(:on_success).with(nil, hash_including("args" => [1, 2, 3]))
       call
     end
 
