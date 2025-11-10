@@ -12,26 +12,6 @@ executors:
       - image: redis:6.2
         command: redis-server
 
-# yaml anchor filters
-always_run: &always_run
-  filters:
-    branches:
-      only: /.*/
-    tags:
-      only: /^v.*/
-pr_only: &pr_only
-  filters:
-    branches:
-      ignore: master
-    tags:
-      ignore: /.*/
-version_tags_only: &version_tags_only
-  filters:
-    branches:
-      ignore: /.*/
-    tags:
-      only: /^v.*/
-
 jobs:
   build:
     executor: ruby-with-redis
@@ -63,8 +43,7 @@ jobs:
 workflows:
   main:
     jobs:
-      - build:
-          <<: *always_run
+      - build:          
           context:
             - sidekiq-enterprise
             - nexus_readonly
