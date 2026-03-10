@@ -7,31 +7,34 @@ module Simplekiq
       @serial_workflow = []
     end
 
-    def run(*step)
+    def run(*step, description: nil)
       workflow = parallel_workflow || serial_workflow
-      workflow << step
+      workflow << {step: step, description: description}
     end
 
-    def in_parallel
+    def in_parallel(description: nil)
       @parallel_workflow = []
       yield
-      serial_workflow << @parallel_workflow if @parallel_workflow.any?
+      serial_workflow << {parallel: @parallel_workflow, description: description} if @parallel_workflow.any?
     ensure
       @parallel_workflow = nil
       serial_workflow
     end
 
     def serialized_workflow
-      @serialized_workflow ||= serial_workflow.map do |step|
-        case step[0]
-        when Array
-          step.map do |(job, *args)|
+      @serialized_workflow ||= serial_workflow.map do |item|
+        result = if item[:parallel]
+          jobs = item[:parallel].map do |entry|
+            job, *args = entry[:step]
             {"klass" => job.name, "args" => args}
           end
-        when Class
-          job, *args = step
+          {"jobs" => jobs}
+        else
+          job, *args = item[:step]
           {"klass" => job.name, "args" => args}
         end
+        result["description"] = item[:description] if item[:description]
+        result
       end
     end
   end

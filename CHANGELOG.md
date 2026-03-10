@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0]
+* Add a new parameter for descriptions to `#run` and `#in_parallel`
+  [#43](https://github.com/doximity/simplekiq/pull/44)
+
 ## [1.0.0]
 * Only support Sidekiq 7.1 and Sidekiq 8 (dropped support for older versions)
   [#42](https://github.com/doximity/simplekiq/pull/42)
