@@ -21,11 +21,7 @@ module Simplekiq
       # This will never be empty because Orchestration#serialized_workflow skips inserting
       # a new step for in_parallel if there were no inner jobs specified.
       jobs = current["jobs"] || [current]
-      description = if current["description"]
-        current["description"]
-      else
-        "Simplekiq orchestrated step #{next_step}"
-      end
+      description = current["description"] || "Simplekiq orchestrated step #{next_step}"
 
       step_batch = Sidekiq::Batch.new
       step_batch.description = description
