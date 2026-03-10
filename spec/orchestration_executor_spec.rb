@@ -89,5 +89,27 @@ RSpec.describe Simplekiq::OrchestrationExecutor do
 
       instance.run_step(workflow, 0)
     end
+
+    context "when a workflow has a description" do
+      let(:workflow) do
+        [
+          {"description" => "Some description", "klass" => "OrcTest::JobA", "args" => [1]}
+        ]
+      end
+      
+      it "sets the description of the step batch" do
+        allow(step_batch).to receive(:jobs) { |&block| block.call }
+        allow(OrcTest::JobA).to receive(:perform_async)
+        allow(Sidekiq::Batch).to receive(:new).and_return(step_batch)
+
+        expect(step_batch).to receive(:on).with("success", described_class, {
+          "orchestration_workflow" => workflow,
+          "step" => 1,
+        })
+        expect(step_batch).to receive(:description=).with("Some description")
+
+        instance.run_step(workflow, 0)
+      end
+    end
   end
 end

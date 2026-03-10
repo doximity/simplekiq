@@ -111,10 +111,10 @@ RSpec.describe Simplekiq::OrchestrationJob do
         job: job,
         workflow: [
           {"klass" => "OrcTest::JobA", "args" => ["some"]},
-          [
+          {"jobs" => [
             {"klass" => "OrcTest::JobB", "args" => ["some"]},
             {"klass" => "OrcTest::JobC", "args" => ["args"]}
-          ]
+          ]}
         ]
       )
 

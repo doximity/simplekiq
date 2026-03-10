@@ -15,13 +15,20 @@ module Simplekiq
     end
 
     def run_step(workflow, step)
-      *jobs = workflow.at(step)
+      current = workflow.at(step)
+      next_step = step + 1
+
       # This will never be empty because Orchestration#serialized_workflow skips inserting
       # a new step for in_parallel if there were no inner jobs specified.
+      jobs = current["jobs"] || [current]
+      description = if current["description"]
+        current["description"]
+      else
+        "Simplekiq orchestrated step #{next_step}"
+      end
 
-      next_step = step + 1
       step_batch = Sidekiq::Batch.new
-      step_batch.description = "Simplekiq orchestrated step #{next_step}"
+      step_batch.description = description
       step_batch.on(
         "success",
         self.class,
