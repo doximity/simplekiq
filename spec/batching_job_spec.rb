@@ -153,6 +153,68 @@ RSpec.describe Simplekiq::BatchingJob do
     end
   end
 
+  describe "the generated batch class" do
+    let(:job_superclass) do
+      Class.new do
+        include Sidekiq::Job
+
+        def self.marker = "inherited from job superclass"
+      end
+    end
+
+    let(:test_job) do
+      Class.new(job_superclass) do
+        include Simplekiq::BatchingJob
+
+        def perform_batching(arg)
+          queue_batch(arg)
+        end
+
+        def perform_batch(arg)
+        end
+      end
+    end
+
+    before do
+      stub_const("TestJob", test_job)
+    end
+
+    it "inherits from the including job's own superclass, not a gem-owned base class" do
+      expect(TestJob::SimplekiqBatch.superclass).to eq(job_superclass)
+      expect(TestJob::SimplekiqBatch.marker).to eq("inherited from job superclass")
+    end
+
+    it "still performs batches via perform_batch" do
+      stub_const("Output", output = double("Output", call: nil))
+      test_job.define_method(:perform_batch) { |arg| Output.call(arg) }
+
+      test_job.new.perform("test")
+
+      expect(output).to have_received(:call).with("test")
+    end
+
+    context "when the job has no explicit superclass" do
+      let(:test_job) do
+        Class.new do
+          include Simplekiq::BatchingJob
+
+          def perform_batching(arg)
+            queue_batch(arg)
+          end
+
+          def perform_batch(arg)
+          end
+        end
+      end
+
+      it "falls back to Object" do
+        stub_const("TestJob", test_job)
+
+        expect(TestJob::SimplekiqBatch.superclass).to eq(Object)
+      end
+    end
+  end
+
   describe "batch_sidekiq_options" do
     let(:test_job) do
       Class.new do

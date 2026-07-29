@@ -67,7 +67,10 @@ module Simplekiq
 
     class << self
       def included(klass)
-        batch_job_class = Class.new(BaseBatch)
+        batch_job_class = Class.new(klass.superclass) do
+          include BaseBatch
+          include Sidekiq::Job
+        end
         klass.const_set(BATCH_CLASS_NAME, batch_job_class)
 
         klass.extend ClassMethods
@@ -132,9 +135,7 @@ module Simplekiq
     end
   end
 
-  class BaseBatch
-    include Sidekiq::Job
-
+  module BaseBatch
     def perform(*args)
       module_parent_of_class.new.perform_batch(*args)
     end
