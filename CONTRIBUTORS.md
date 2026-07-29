@@ -24,6 +24,7 @@
 
 ### Lucas Lazzaris (Doximity)
 * Added support for sidekiq 7.x
+* Allowed `Simplekiq::BatchingJob` to be used as a mixin instead of a superclass, allowing it to be used with other job classes that already inherit from a different superclass (e.g., `ApplicationJob` in Rails)
 
 ### [Daniel Pepper](https://github.com/dpep)
 * On request, graciously took down his unused `simplekiq` placeholder from rubygems so we could continue using the name :raised_hands:
